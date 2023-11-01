@@ -136,7 +136,7 @@ export class UserService {
 
 		const existingSuperAdmin = await this.findUsersByRole(UserRoleName.SUPER_ADMIN, [ UserStatus.ON_CHECK, UserStatus.ACTIVE ])
 
-		if (!existingSuperAdmin.length) {
+		if (existingSuperAdmin.length) {
 			throw new HttpException("SuperAdmin User already exist", HttpStatus.FORBIDDEN)
 		}
 
@@ -146,5 +146,33 @@ export class UserService {
 		console.log("random pass: ", randomPassword)
 		superAdmin.roles = [superAdminRole]	
 
+		const createdSuperAdmin = await this.userRepository.save(superAdmin)
+
+		await this.mailerService.sendMail({
+			to: superAdmin.email,
+			from: this.configService.get<string>('EMAIL'),
+			subject: "Please confirm your email!",
+			text: `Your password is: ${randomPassword}, enter your password to activate your account`,
+			html: ""
+		})
+
+		return createdSuperAdmin
+	}
+
+	/* TODO: Create method to change super admin email */
+	async changeSuperAdminEmail() {
+
+	}
+	/* TODO *********************************************/
+
+	/* TODO: Resend password to super admin email */
+	async resendSuperAdminPassword() {
+		
+	}
+	/* TODO ***************************************/
+
+	async confirmSuperAdminAccountByPassword(userId: string) {
+		await this.userRepository.update(userId, { status: UserStatus.ACTIVE })
+		return this.findById(userId)
 	}
 }

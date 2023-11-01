@@ -50,4 +50,11 @@ export class UserController {
 	async test() {
 		return await this.userService.findUsersByRole(UserRoleName.USER, [UserStatus.ACTIVE, UserStatus.ON_CHECK])
 	}
+
+	@Post("super-admin")
+	async createNewSuperAdmin(
+		@Body() user: UserBody
+	) {
+		return await this.userService.createSuperAdmin(user)
+	}
 }
